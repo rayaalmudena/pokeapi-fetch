@@ -22,7 +22,8 @@
     <div class="container">
         <div class="input-group mb-3">
             <span class="input-group-text" id="selected-pokemon-label">Which pokemon do you want to display?</span>
-            <select id="select-pokemon" class="form-select" aria-label="selected pokemon" aria-describedby="selected-pokemon-label">
+            <select id="select-pokemon" class="form-select" aria-label="selected pokemon"
+                aria-describedby="selected-pokemon-label">
                 <option selected>Select one pokemon</option>
                 <option value="pikachu">Pikachu</option>
                 <option value="charmander">Charmander</option>
@@ -32,6 +33,48 @@
     </div>
 </body>
 <script>
+
+    let pokemonNum = 20;
+
+    window.onload = async function() {
+
+        let response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=" + pokemonNum);
+        let morePokemon = await response.json();
+
+        morePokemon.results.forEach(NewPokemon => {
+            
+            if (!document.querySelector("option[value='"+NewPokemon.name+"']")) {         
+                let newOption = document.createElement("option");
+                newOption.innerText = NewPokemon.name[0].toUpperCase()+NewPokemon.name.slice(1);
+                newOption.value = NewPokemon.name;
+                document.querySelector("#select-pokemon").appendChild(newOption);
+            }
+        });
+    };  
+
+    document.querySelector("#select-pokemon").addEventListener("change", async function () {
+
+        document.querySelector("#select-pokemon").disabled = true;
+
+        document.querySelector(".card-img-top").classList.remove("d-none");
+        let pokemonSelected = document.querySelector("#select-pokemon").value;
+
+        let response = await fetch("https://pokeapi.co/api/v2/pokemon/" + pokemonSelected);
+        let pokemon = await response.json();
+
+        document.querySelector("h5").innerText=pokemonSelected;
+        document.querySelector(".card-img-top").src = pokemon.sprites.front_default;
+
+        localStorage.shiny = pokemon.sprites.front_shiny;
+
+        document.querySelector("#select-pokemon").disabled = false;
+    });
+
+    document.querySelector("a.btn").addEventListener("click", function () {      
+        document.querySelector(".card-img-top").src = localStorage.shiny;       
+    });
+    
+
     // 1. Cuando cambie el valor del selector, tenemos que detectar que opción hemos escogido. Probad que sois capaces de recuperar el valor seleccionado por el usuario con un console.log
 
     // 2. En función de la opción escogida, 'montaremos' una URL
